@@ -1,13 +1,30 @@
 # Attention
 Please read this documentation correctly. Some folder structure may confuse you. 
 
-`core` folder is contains `backend.py`. That is the core of the logic 🖖 
+1. `app-history` folder is the most updated and worked app. To run this app only need 2 files: `2app.py + agent_backend.py`.   
 
-`simple` folder is for simple version chatbot application to understand how Streamlit and Strands work. So it's educational only.
+`backend-history-test.py` is the file to test your chat history based on session ID. 
 
-`test` folder is for experiment only. That's all.
+*backend-history-test.py*: 
+```
+    ...
+        session_manager=session_manager,
+        system_prompt="You are a helpful AWS expert assistant."
+    )
 
-> This code was run on EC2 instance and use AmazonLinux2023
+print(create_aws_agent('<put-your-session-here>').messages)
+```
+
+2. `core` folder is contains `backend.py`. That is the core of the logic 🖖 
+
+3. `simple` folder is for simple version chatbot application to understand how Streamlit and Strands work. So it's educational only.
+
+4. `test` folder is for experiment only. That's all.  
+
+> **Note:⚠️**  
+This code was run on `EC2 instance` and use `AmazonLinux2023`.  
+Python version used is `Python 3.11`.  
+This instance use instance role with sufficient `BedrockInvoke, S3Access, EC2Access`.
 
 ## 👌 In case you don't know - Python documentation for beginner
 ### Update python 3.11

@@ -7,6 +7,8 @@ Please read this documentation correctly. Some folder structure may confuse you.
 
 `test` folder is for experiment only. That's all.
 
+> This code was run on EC2 instance and use AmazonLinux2023
+
 ## 👌 In case you don't know - Python documentation for beginner
 ### Update python 3.11
 ```

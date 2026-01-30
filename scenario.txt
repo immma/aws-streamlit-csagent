@@ -1,0 +1,12 @@
+how many ec2s in region jakarta?
+
+answer in table format
+
+please add vpc association
+
+add key pair information
+
+could you check who is the creator of those ec2
+
+
+give me 5 best practice on iam role creation, should be not long answer

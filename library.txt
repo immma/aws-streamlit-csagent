@@ -1,0 +1,1 @@
+pip install streamlit strands-agents strands-agents-tools boto3 streamlit-authenticator

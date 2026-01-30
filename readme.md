@@ -61,6 +61,11 @@ streamlit-authenticator
 The best version of customer agent app is in the `app-history` folder:  
 `2app.py + agent_backend.py`
 
+
+#### How to run the app?
+```
+streamlit run 2app.py
+```
 ---
 ***UPDATE per 28 Jan 2026 👇***  
 If you want to run with simple logic (folder: `simple`), you can use:  
@@ -68,7 +73,6 @@ If you want to run with simple logic (folder: `simple`), you can use:
 
 But if you want to add some login mechanism, you can use:  
 `login.py + agent_backend.py`
-
 
 ## Note
 Everything in `test` folder is for experiment only. Some code contains error. Do your own risk. 😊

@@ -128,12 +128,12 @@ st.caption(f"Session: {st.session_state.chat_id}")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+        st.write(message["content"])
 
 if prompt := st.chat_input("How can I help with your AWS stack?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.write(prompt)
 
     with st.chat_message("assistant"):
         with st.spinner("AWS Doctor is thinking..."):
@@ -142,7 +142,7 @@ if prompt := st.chat_input("How can I help with your AWS stack?"):
                 response = agent(prompt)
                 full_text = str(response)
                 
-                st.markdown(full_text)
+                st.write(full_text)
                 st.session_state.messages.append({"role": "assistant", "content": full_text})
                 
                 chat_title = None

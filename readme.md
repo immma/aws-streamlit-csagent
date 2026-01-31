@@ -1,7 +1,12 @@
 # Attention
 Please read this documentation correctly. Some folder structure may confuse you. 
 
-1. `app-history` folder is the most updated. To run this app only need 2 files: `1app.py + agent_backend.py`.   
+1. `app-history` folder is the most updated. To run this app only need 2 files:  
+`1app.py + agent_backend.py`
+or 
+`2app.py + agent_backend.py`.  
+
+`2app.py` offers more simple UI.
 
 `backend-history-test.py` is the file to test your chat history based on session ID. 
 

@@ -1,7 +1,7 @@
 # Attention
 Please read this documentation correctly. Some folder structure may confuse you. 
 
-1. `app-history` folder is the most updated. To run this app only need 2 files: `2app.py + agent_backend.py`.   
+1. `app-history` folder is the most updated. To run this app only need 2 files: `1app.py + agent_backend.py`.   
 
 `backend-history-test.py` is the file to test your chat history based on session ID. 
 
@@ -74,9 +74,15 @@ streamlit-authenticator
 ```
 
 ## BEST PRACTICE
-> ***Latest per 30 Jan 2026 🚀***  
+> ***Latest per 31 Jan 2026 🚀***  
 The best version of customer agent app is in the `app-history` folder:  
-`2app.py + agent_backend.py`
+`1app.py + agent_backend.py`
+
+#### New Features:  
+* Delete chat history
+* Pointer active chat
+* Export full chat DB as JSON
+* Export current chat as TXT
 
 
 #### How to run the app?

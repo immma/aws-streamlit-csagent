@@ -6,93 +6,150 @@ from agent_backend import create_aws_agent
 
 st.set_page_config(page_title="AWS Strands Chat", page_icon="☁️")
 st.title("☁️ AWS Cloud Assistant")
-st.caption("Powered by Strands Agents & Amazon Bedrock. Code by ArdiH")
 
 # --- SETTINGS & PATHS ---
-DB_FILE = "chatdb/master_history.json"
+DB_FILE = "chatdb/master_history_2.json"
 os.makedirs("chatdb", exist_ok=True)
 
 # --- DATABASE FUNCTIONS ---
 def load_all_history():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(DB_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return {}
     return {}
 
-def save_to_master(chat_id, messages):
+def save_to_master(chat_id, messages, title=None):
     data = load_all_history()
-    data[chat_id] = messages
+    if chat_id in data and isinstance(data[chat_id], dict):
+        display_title = data[chat_id].get("title", "Existing Chat")
+    else:
+        display_title = title if title else "New Chat"
+
+    data[chat_id] = {"title": display_title, "messages": messages}
     with open(DB_FILE, "w") as f:
         json.dump(data, f, indent=4)
+
+def delete_chat(chat_id):
+    data = load_all_history()
+    if chat_id in data:
+        del data[chat_id]
+        with open(DB_FILE, "w") as f:
+            json.dump(data, f, indent=4)
+        
+        # Reset to a fresh state if the deleted chat was the active one
+        if st.session_state.chat_id == chat_id:
+            st.session_state.chat_id = str(uuid.uuid4())
+            st.session_state.messages = []
+        
+        # Force a rerun to close all popovers and refresh list
+        st.rerun()
 
 # --- SESSION STATE INITIALIZATION ---
 if 'chat_id' not in st.session_state:
     st.session_state.chat_id = str(uuid.uuid4())
-
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.header("Control Panel")
+    st.header("Cloud Controls")
     
-    # BUTTON: Create New Chat
-    if st.button("➕ New Chat", use_container_width=True):
+    if st.button("➕ Start New Conversation", use_container_width=True, type="primary"):
         st.session_state.chat_id = str(uuid.uuid4())
         st.session_state.messages = []
         st.rerun()
 
-    st.divider()
-    st.header("History")
-    
-    all_chats = load_all_history()
-    chat_options = list(all_chats.keys())
-
-    if chat_options:
-        # We use a selectbox to switch between old chats
-        selected_id = st.selectbox(
-            "Select a previous chat:",
-            options=chat_options,
-            index=None,
-            placeholder="Choose a session..."
+    # --- DOWNLOAD SECTION ---
+    all_history_data = load_all_history()
+    if all_history_data:
+        # 1. Download Entire Database (JSON)
+        json_bytes = json.dumps(all_history_data, indent=4).encode('utf-8')
+        st.download_button(
+            label="📥 Export Full DB (JSON)",
+            data=json_bytes,
+            file_name="aws_master_history.json",
+            mime="application/json",
+            use_container_width=True
         )
         
-        if selected_id and selected_id != st.session_state.chat_id:
-            st.session_state.chat_id = selected_id
-            st.session_state.messages = all_chats[selected_id]
-            st.rerun()
+        # 2. Download CURRENT Chat (Text)
+        if st.session_state.messages:
+            chat_text = f"AWS Chat Session: {st.session_state.chat_id}\n" + "="*30 + "\n"
+            for m in st.session_state.messages:
+                chat_text += f"{m['role'].upper()}: {m['content']}\n\n"
+            
+            st.download_button(
+                label="📄 Export Current Chat (TXT)",
+                data=chat_text,
+                file_name=f"chat_{st.session_state.chat_id[:8]}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+
+    st.divider()
+    st.subheader("Recent Chats")
+    
+    search_query = st.text_input("🔍 Search", placeholder="Keywords...").lower()
+    
+    if all_history_data:
+        filtered_chats = {
+            cid: cdata for cid, cdata in all_history_data.items() 
+            if search_query in (cdata['title'] if isinstance(cdata, dict) else "").lower()
+        }
+
+        if filtered_chats:
+            for cid, cdata in reversed(list(filtered_chats.items())):
+                title = cdata['title'] if isinstance(cdata, dict) else f"Legacy {cid[:5]}"
+                label = f"➡️ {title}" if cid == st.session_state.chat_id else f"💬 {title}"
+                
+                col1, col2 = st.columns([0.8, 0.2])
+                with col1:
+                    if st.button(label, key=f"load_{cid}", use_container_width=True):
+                        st.session_state.chat_id = cid
+                        st.session_state.messages = cdata['messages'] if isinstance(cdata, dict) else cdata
+                        st.rerun()
+                with col2:
+                    # Native Popover for confirmation
+                    with st.popover("🗑️"):
+                        st.write("Confirm delete?")
+                        # Calling delete_chat here will trigger st.rerun() inside the function
+                        if st.button("Yes, delete", key=f"conf_{cid}", type="primary"):
+                            delete_chat(cid)
+        else:
+            st.info("No matches.")
     else:
-        st.info("No saved chats yet.")
+        st.info("No history yet.")
 
-# --- MAIN CHAT INTERFACE ---
-st.caption(f"Current Session ID: {st.session_state.chat_id}")
+# --- MAIN CHAT ---
+st.caption(f"Session: {st.session_state.chat_id}")
 
-# Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Chat input
-if prompt := st.chat_input("Ask about your AWS resources..."):
-    # Show user message
+if prompt := st.chat_input("How can I help with your AWS stack?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate assistant response
     with st.chat_message("assistant"):
-        with st.spinner("Consulting AWS..."):
+        with st.spinner("AWS Doctor is thinking..."):
             try:
-                # Backend agent uses the same chat_id
                 agent = create_aws_agent(session_id=st.session_state.chat_id)
                 response = agent(prompt)
                 full_text = str(response)
-                print("CHAT ID: " + st.session_state.chat_id)
+                
                 st.markdown(full_text)
                 st.session_state.messages.append({"role": "assistant", "content": full_text})
                 
-                # Save to the single master JSON
-                save_to_master(st.session_state.chat_id, st.session_state.messages)
+                chat_title = None
+                if len(st.session_state.messages) <= 2:
+                    chat_title = prompt[:30] + ("..." if len(prompt) > 30 else "")
+                
+                save_to_master(st.session_state.chat_id, st.session_state.messages, title=chat_title)
                 
             except Exception as e:
                 st.error(f"Error: {e}")

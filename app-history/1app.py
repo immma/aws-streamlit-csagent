@@ -2,6 +2,8 @@ import streamlit as st
 import uuid
 import os
 import json
+import streamlit.components.v1 as components
+from streamlit_renderer import render_hybrid_response
 from agent_backend import create_aws_agent
 
 st.set_page_config(page_title="AWS Strands Chat", page_icon="☁️")
@@ -46,6 +48,33 @@ def delete_chat(chat_id):
         
         # Force a rerun to close all popovers and refresh list
         st.rerun()
+
+
+# -------- RENDER MERMAID AND MARKDOWN ----------
+# def render_mermaid(code: str):
+#     html_code = f"""
+#     <div class="mermaid" style="display: flex; justify-content: center;">
+#         {code}
+#     </div>
+#     <script type="module">
+#         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+#         mermaid.initialize({{ startOnLoad: true }});
+#     </script>
+#     """
+#     components.html(html_code)
+
+# def render_hybrid_response(text: str):
+#     # Regex to find mermaid blocks: ```mermaid ... ```
+#     parts = re.split(r'(```mermaid\n.*?\n```)', text, flags=re.DOTALL)
+    
+#     for part in parts:
+#         if part.startswith("```mermaid"):
+#             # Strip the backticks and 'mermaid' keyword to get raw code
+#             clean_code = part.replace("```mermaid\n", "").replace("```", "")
+#             render_mermaid(clean_code)
+#         else:
+#             # It's just regular markdown
+#             st.markdown(part)
 
 # --- SESSION STATE INITIALIZATION ---
 if 'chat_id' not in st.session_state:
@@ -128,7 +157,7 @@ st.caption(f"Session: {st.session_state.chat_id}")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.write(message["content"])
+        render_hybrid_response(message["content"])
 
 if prompt := st.chat_input("How can I help with your AWS stack?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -142,7 +171,8 @@ if prompt := st.chat_input("How can I help with your AWS stack?"):
                 response = agent(prompt)
                 full_text = str(response)
                 
-                st.write(full_text)
+                # st.write(full_text) # Disable native streamlit 
+                render_hybrid_response(full_text)
                 st.session_state.messages.append({"role": "assistant", "content": full_text})
                 
                 chat_title = None

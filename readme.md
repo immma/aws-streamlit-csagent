@@ -6,7 +6,11 @@ Please read this documentation correctly. Some folder structure may confuse you.
 or 
 `2app.py + agent_backend.py`.  
 
-`2app.py` offers more simple UI.
+    * `1app.py` is experimental.  
+per 1 Feb 2026, trying to render mermaid into chat response using streamlit custom component.  
+    Custom components: `app-history/streamlit_renderer.py`
+
+    * `2app.py` offers more simple UI.  
 
 `backend-history-test.py` is the file to test your chat history based on session ID. 
 
